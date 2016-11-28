@@ -1,6 +1,6 @@
 class Card
-  #value
-  #suit
+  # value
+  # suit
   attr_accessor :value, :suit, :face
 
   def description
@@ -26,6 +26,7 @@ class Deck
         card.face = value
         @cards << card
       end
+
       ["Jack", "Queen", "King"].each do |face|
         card = Card.new
         card.value = 10
@@ -33,6 +34,7 @@ class Deck
         card.face = face
         @cards << card
       end
+
       ["Ace"].each do |face|
         card = Card.new
         card.value = 11
@@ -58,20 +60,24 @@ class Hand
   def initialize (deck)
     @cards = []
     2.times do
-      card = deck.deal
-      @cards << card
+      hit(deck)
     end
   end
 
+  def hit(deck)
+    card = deck.deal
+    @cards << card
+  end
+
   def description
-    @cards.map {|card| card.description}.join(" and ")
+    @cards.map { |card| card.description}.join(" and ")
   end
 
   def value
     # Long version of inject
-    @cards.inject(0) {|total, card| total + card.value}
+    @cards.inject(0) { |total, card| total + card.value}
     # Short hand version of inject
-    @cards.map {|card| card.value}.inject(:+)
+    @cards.map { |card| card.value}.inject(:+)
     # Without inject
     total = 0
     @cards.each do |card|
@@ -91,14 +97,81 @@ end
 
 deck = Deck.new
 
-p deck.cards.length
+puts "The dealer starts with a full deck of #{deck.cards.length} cards."
+puts
+puts
+
+puts "The dealer draws the player two cards from a fresh deck."
 
 player_hand = Hand.new(deck)
-p player_hand.description
-p player_hand.value
-p player_hand.blackjack?
+puts
+puts "The two cards the player recieves: "
+puts "#{player_hand.description}"
+puts "Card Value: #{player_hand.value}"
+if player_hand.value == 21
+  puts "YOU HAVE WOND THE GAME"
+  exit
+end
 
 dealer_hand = Hand.new(deck)
-p dealer_hand.description
-p dealer_hand.value
-p dealer_hand.blackjack?
+puts
+puts "The two cards the dealer recieves: "
+puts "#{dealer_hand.description}"
+puts "Card Value: #{dealer_hand.value}"
+if dealer_hand.value == 21
+  puts "DEALER HAS BLACKJACK. YOU LOST THE GAME."
+  exit
+end
+
+loop do
+  puts "Player, do you want another card? (y/n)"
+  answer = gets.chomp
+
+  if answer == "n"
+    dealer_hand.hit(deck)
+    puts
+    puts "The cards the DEALER now holds are: "
+    puts "#{dealer_hand.description}"
+    puts "Combined value: #{dealer_hand.value}"
+    puts
+
+    if player_hand.value < 21 && dealer_hand.value < 21
+      break
+    else
+      if player_hand.value == 21 || (player_hand.value < 21 && dealer_hand.value > 21)
+        puts "YOU HAVE WON THE GAME"
+        break
+      else player_hand.value > 21
+        puts "YOU HAVE BUSTED AND LOST THE GAME"
+        break
+      end
+    end
+  end
+
+  if answer == "y"
+    player_hand.hit(deck)
+    dealer_hand.hit(deck)
+    puts
+    puts "The cards the PLAYER now holds are: "
+    puts "#{player_hand.description}"
+    puts "Combined value: #{player_hand.value}"
+    puts
+    puts
+    puts "The cards the DEALER now holds are: "
+    puts "#{dealer_hand.description}"
+    puts "Combined value: #{dealer_hand.value}"
+    puts
+
+    if player_hand.value < 21 && dealer_hand.value < 21
+      break
+    else
+      if player_hand.value == 21 || (player_hand.value < 21 && dealer_hand.value > 21)
+        puts "YOU HAVE WON THE GAME"
+        break
+      else player_hand.value > 21
+        puts "YOU HAVE BUSTED AND LOST THE GAME"
+        break
+      end
+    end
+  end
+end
